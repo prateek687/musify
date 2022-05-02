@@ -1,0 +1,6 @@
+api:
+  url:
+    musicbrainz: http://localhost:8080/ws/2/artist/
+    wikidata: http://localhost:8080/wiki/Special:EntityData/
+    wikipedia: http://localhost:8080/api/rest_v1/page/summary/
+    coverart: http://localhost:8080/release-group/

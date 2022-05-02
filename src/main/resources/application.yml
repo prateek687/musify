@@ -1,0 +1,51 @@
+
+api:
+    url:
+      musicbrainz: http://musicbrainz.org/ws/2/artist/
+      wikidata: https://www.wikidata.org/wiki/Special:EntityData/
+      wikipedia: https://en.wikipedia.org/api/rest_v1/page/summary/
+      coverart: http://coverartarchive.org/release-group/
+
+webClient:
+  maxConnections: 500
+  idleTime: 300
+  lifeTime: 1500
+  responseTimeout: 15
+  #20*1024*1024
+  maxInMemorySize: 20971520
+
+management.health:
+  circuitbreakers.enabled: true
+
+resilience4j.timelimiter:
+  instances:
+    artistDetailsTimeLimiter:
+      cancelRunningFuture: true
+      timeoutDuration: 15s
+
+resilience4j.circuitbreaker:
+  instances:
+    artistDetailsCB:
+      registerHealthIndicator: true
+      slidingWindowSize: 15
+      failureRateThreshold: 20
+      slowCallRateThreshold: 50
+      slowCallDurationThreshold: 10s
+      permittedNumberOfCallsInHalfOpenState: 2
+      waitDurationInOpenState: 1s
+      eventConsumerBufferSize: 20
+      minimumNumberOfCalls: 3
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      recordExceptions:
+        - java.util.concurrent.TimeoutException
+        - io.github.resilience4j.ratelimiter.RequestNotPermitted
+        - org.springframework.web.reactive.function.client.WebClientResponseException.ServiceUnavailable
+
+resilience4j.ratelimiter:
+  instances:
+    musicBrainzRateLimiter:
+      limitForPeriod: &rate_limit 1
+      limitRefreshPeriod: 1s
+      timeoutDuration: 15s
+server:
+  port: 8081
